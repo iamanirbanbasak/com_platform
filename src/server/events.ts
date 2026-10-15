@@ -60,6 +60,11 @@ export async function createEvent(
   )
 }
 
+export async function clubIdOfEvent(eventId: string): Promise<string | null> {
+  const event = await db.event.findUnique({ where: { id: eventId }, select: { clubId: true } })
+  return event?.clubId ?? null
+}
+
 async function loadOwnedEvent(actor: Actor | null, eventId: string) {
   const event = await db.event.findUnique({ where: { id: eventId }, select: { clubId: true } })
   if (!event) return fail('NOT_FOUND', 'Event not found.')

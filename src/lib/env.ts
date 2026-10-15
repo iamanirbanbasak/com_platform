@@ -6,7 +6,7 @@ function optional(name: string): string | undefined {
 }
 
 export const env = {
-  appUrl: optional('NEXT_PUBLIC_APP_URL') ?? 'http://localhost:3000',
+  appUrl: (optional('BETTER_AUTH_URL') ?? 'http://localhost:3000').replace(/\/$/, ''),
   googleClientId: optional('GOOGLE_CLIENT_ID'),
   googleClientSecret: optional('GOOGLE_CLIENT_SECRET'),
   resendApiKey: optional('RESEND_API_KEY'),

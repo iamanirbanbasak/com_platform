@@ -6,7 +6,7 @@ import { formValues, fromResult, invalid, type ActionState } from '@/lib/action-
 import { clubProfileSchema, eventSchema, galleryCaptionSchema, postSchema } from '@/lib/validation'
 import { requireClubManager } from '@/server/access'
 import { updateClubProfile } from '@/server/clubs'
-import { createEvent, deleteEvent, updateEvent } from '@/server/events'
+import { clubIdOfEvent, createEvent, deleteEvent, updateEvent } from '@/server/events'
 import { addGalleryImage, deleteGalleryImage } from '@/server/gallery'
 import { createInvite, revokeInvite } from '@/server/invites'
 import { removeMember } from '@/server/memberships'
@@ -92,10 +92,11 @@ export async function saveEventAction(
   if (!parsed.success) return invalid(parsed.error)
 
   const user = await getCurrentUser()
-  if ('clubId' in target) {
-    const access = await requireClubManager(user, target.clubId)
-    if (!access.ok) return fromResult(access, '')
-  }
+  // Check access before storing the upload so strangers can't fill the bucket.
+  const clubId = 'clubId' in target ? target.clubId : await clubIdOfEvent(target.eventId)
+  if (!clubId) return { ok: false, message: 'Event not found.', at: Date.now() }
+  const access = await requireClubManager(user, clubId)
+  if (!access.ok) return fromResult(access, '')
 
   const cover = await imageFromForm(formData, 'cover', 'events')
   if (!cover.ok) return fromResult(cover, '')

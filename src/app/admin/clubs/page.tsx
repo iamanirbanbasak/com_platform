@@ -8,6 +8,7 @@ import { ImageInput } from '@/components/image-input'
 import { NameAndSlugFields } from '@/components/slug-field'
 import { Field, Select, TextAreaField, TextField } from '@/components/ui/field'
 import { Badge, EmptyState } from '@/components/ui/misc'
+import { plural } from '@/lib/utils'
 import { CLUB_CATEGORIES } from '@/lib/validation'
 import { listAllClubsForAdmin } from '@/server/clubs'
 import { getCurrentUser } from '@/server/session'
@@ -30,13 +31,11 @@ export default async function AdminClubsPage() {
         <ActionForm action={createClubAction} resetOnSuccess>
           <NameAndSlugFields />
           <Field name="category" label="Category">
-            {({ id }) => (
-              <Select id={id} name="category" defaultValue="General">
-                {CLUB_CATEGORIES.map((category) => (
-                  <option key={category}>{category}</option>
-                ))}
-              </Select>
-            )}
+            <Select name="category" defaultValue="General">
+              {CLUB_CATEGORIES.map((category) => (
+                <option key={category}>{category}</option>
+              ))}
+            </Select>
           </Field>
           <TextAreaField name="description" label="Description" rows={3} />
           <TextField
@@ -67,8 +66,8 @@ export default async function AdminClubsPage() {
                     {club.status === 'ARCHIVED' ? <Badge tone="danger">Archived</Badge> : null}
                   </p>
                   <p className="text-sm text-slate">
-                    {club.category}, {club._count.memberships} members, {club._count.follows}{' '}
-                    followers
+                    {club.category}, {plural(club._count.memberships, 'member')},{' '}
+                    {plural(club._count.follows, 'follower')}
                   </p>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                     <span className="text-slate">President:</span>

@@ -25,12 +25,10 @@ export function PostFormFields({ defaults, submitLabel }: PostFormFieldsProps) {
         hint="Markdown works: **bold**, _italic_, [links](https://example.com) and lists."
       />
       <Field name="visibility" label="Who can see this?">
-        {({ id }) => (
-          <Select id={id} name="visibility" defaultValue={defaults?.visibility ?? 'PUBLIC'}>
-            <option value="PUBLIC">Everyone</option>
-            <option value="MEMBERS">Official members only</option>
-          </Select>
-        )}
+        <Select name="visibility" defaultValue={defaults?.visibility ?? 'PUBLIC'}>
+          <option value="PUBLIC">Everyone</option>
+          <option value="MEMBERS">Official members only</option>
+        </Select>
       </Field>
       <SubmitButton pendingLabel="Publishing…">{submitLabel}</SubmitButton>
     </>

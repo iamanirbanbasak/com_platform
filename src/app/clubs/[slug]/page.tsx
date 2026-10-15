@@ -11,14 +11,14 @@ import { PostCard } from '@/components/post-card'
 import { ButtonLink } from '@/components/ui/button'
 import { Badge, Container, EmptyState } from '@/components/ui/misc'
 import { formatDate } from '@/lib/dates'
-import { cn, initials } from '@/lib/utils'
+import { cn, initials, plural } from '@/lib/utils'
 import { canManageClub } from '@/server/access'
 import { getClubBySlug } from '@/server/clubs'
 import { listClubEvents } from '@/server/events'
 import { isFollowing } from '@/server/follows'
 import { listGallery } from '@/server/gallery'
 import { isMember, listMembers } from '@/server/memberships'
-import { listClubPosts } from '@/server/posts'
+import { countHiddenPosts, listClubPosts } from '@/server/posts'
 import { getCurrentUser } from '@/server/session'
 
 const TABS = [
@@ -75,7 +75,8 @@ export default async function ClubPage({ params, searchParams }: PageProps<'/clu
               {member ? <Badge tone="ok">Official member</Badge> : null}
             </div>
             <p className="mt-1 text-slate">
-              {club.category}, {club._count.memberships} members, {club._count.follows} followers
+              {club.category}, {plural(club._count.memberships, 'member')},{' '}
+              {plural(club._count.follows, 'follower')}
               {club.president ? `. President: ${club.president.name}` : ''}
             </p>
           </div>
@@ -116,7 +117,7 @@ export default async function ClubPage({ params, searchParams }: PageProps<'/clu
         ))}
       </nav>
 
-      {tab === 'posts' ? <PostsTab club={club} viewer={user} member={member} /> : null}
+      {tab === 'posts' ? <PostsTab club={club} viewer={user} /> : null}
       {tab === 'events' ? <EventsTab clubId={club.id} clubName={club.name} /> : null}
       {tab === 'members' ? <MembersTab clubId={club.id} presidentId={club.presidentId} /> : null}
       {tab === 'gallery' ? <GalleryTab clubId={club.id} /> : null}
@@ -127,21 +128,37 @@ export default async function ClubPage({ params, searchParams }: PageProps<'/clu
 async function PostsTab({
   club,
   viewer,
-  member,
 }: {
   club: { id: string; presidentId: string | null }
   viewer: Awaited<ReturnType<typeof getCurrentUser>>
-  member: boolean
 }) {
-  const posts = await listClubPosts(club, viewer)
+  const [posts, hidden] = await Promise.all([
+    listClubPosts(club, viewer),
+    countHiddenPosts(club, viewer),
+  ])
+  const hiddenNote =
+    hidden > 0 ? (
+      <p className="rounded-xl bg-cobalt-soft px-4 py-3 text-sm text-cobalt">
+        {hidden === 1 ? '1 post is' : `${hidden} posts are`} for official members only.
+        {viewer
+          ? ' Ask the club president for an invite to join.'
+          : ' Sign in as a member to read them.'}
+      </p>
+    ) : null
+
   if (posts.length === 0) {
-    return <EmptyState title="No posts yet">Announcements from the club show up here.</EmptyState>
+    return (
+      <div className="max-w-3xl space-y-4">
+        {hiddenNote}
+        <EmptyState title="No public posts yet">
+          Announcements from the club show up here.
+        </EmptyState>
+      </div>
+    )
   }
   return (
     <div className="max-w-3xl space-y-4">
-      {!member && !viewer ? (
-        <p className="text-sm text-slate">Some posts are visible to official members only.</p>
-      ) : null}
+      {hiddenNote}
       {posts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}

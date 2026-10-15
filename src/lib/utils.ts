@@ -27,3 +27,7 @@ export function slugify(input: string): string {
     .replace(/^-+|-+$/g, '')
     .slice(0, 60)
 }
+
+export function plural(count: number, noun: string): string {
+  return `${count} ${count === 1 ? noun : `${noun}s`}`
+}

@@ -16,13 +16,11 @@ export default async function ProfilePage({ params }: PageProps<'/manage/[slug]/
       <ActionForm action={updateProfileAction.bind(null, club.id, club.slug)}>
         <TextField name="name" label="Club name" defaultValue={club.name} required />
         <Field name="category" label="Category">
-          {({ id }) => (
-            <Select id={id} name="category" defaultValue={club.category}>
-              {CLUB_CATEGORIES.map((category) => (
-                <option key={category}>{category}</option>
-              ))}
-            </Select>
-          )}
+          <Select name="category" defaultValue={club.category}>
+            {CLUB_CATEGORIES.map((category) => (
+              <option key={category}>{category}</option>
+            ))}
+          </Select>
         </Field>
         <TextAreaField
           name="description"

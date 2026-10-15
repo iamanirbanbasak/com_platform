@@ -12,7 +12,7 @@ import { createEvent, listClubEvents } from '@/server/events'
 import { followClub, isFollowing, unfollowClub } from '@/server/follows'
 import { addGalleryImage, deleteGalleryImage } from '@/server/gallery'
 import { leaveClub, removeMember } from '@/server/memberships'
-import { createPost, deletePost, getFeed, listClubPosts } from '@/server/posts'
+import { countHiddenPosts, createPost, deletePost, getFeed, listClubPosts } from '@/server/posts'
 import { deleteUser, setUserBanned } from '@/server/users'
 
 import {
@@ -134,6 +134,15 @@ describe('club content', () => {
     expect(await titles(actorOf(member))).toEqual(['Public', 'Secret'])
     expect(await titles(actorOf(president))).toEqual(['Public', 'Secret'])
     expect(await titles(actorOf(admin))).toEqual(['Public', 'Secret'])
+  })
+
+  it('tells outsiders how many members-only posts they cannot see', async () => {
+    const { club, presidentActor } = await createClubWithPresident()
+    await createPost(presidentActor, club.id, { title: 'A', body: '.', visibility: 'MEMBERS' })
+    await createPost(presidentActor, club.id, { title: 'B', body: '.', visibility: 'MEMBERS' })
+
+    expect(await countHiddenPosts(club, null)).toBe(2)
+    expect(await countHiddenPosts(club, presidentActor)).toBe(0)
   })
 
   it('splits events into upcoming and past', async () => {

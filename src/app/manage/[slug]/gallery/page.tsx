@@ -20,16 +20,14 @@ export default async function ManageGalleryPage({ params }: PageProps<'/manage/[
         <h2 className="mb-4 font-display text-xl font-bold">Add a photo</h2>
         <ActionForm action={uploadPhotoAction.bind(null, club.id, club.slug)} resetOnSuccess>
           <Field name="photo" label="Photo" hint="JPEG, PNG, WebP or GIF, up to 5 MB.">
-            {({ id }) => (
-              <input
-                id={id}
-                name="photo"
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                required
-                className="block text-sm file:mr-3 file:rounded-lg file:border file:border-line file:bg-surface file:px-3 file:py-1.5 file:font-semibold"
-              />
-            )}
+            <input
+              id="field-photo"
+              name="photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              required
+              className="block text-sm file:mr-3 file:rounded-lg file:border file:border-line file:bg-surface file:px-3 file:py-1.5 file:font-semibold"
+            />
           </Field>
           <TextField name="caption" label="Caption (optional)" maxLength={300} />
           <SubmitButton pendingLabel="Uploading…">Upload photo</SubmitButton>

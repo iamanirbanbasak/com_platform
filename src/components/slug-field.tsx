@@ -14,35 +14,27 @@ export function NameAndSlugFields() {
   return (
     <>
       <Field name="name" label="Club name">
-        {({ id, invalid }) => (
-          <Input
-            id={id}
-            name="name"
-            required
-            maxLength={80}
-            aria-invalid={invalid}
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value)
-              if (!touched) setSlug(slugify(event.target.value))
-            }}
-          />
-        )}
+        <Input
+          name="name"
+          required
+          maxLength={80}
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value)
+            if (!touched) setSlug(slugify(event.target.value))
+          }}
+        />
       </Field>
       <Field name="slug" label="Page address" hint={`/clubs/${slug || 'your-club'}`}>
-        {({ id, invalid }) => (
-          <Input
-            id={id}
-            name="slug"
-            required
-            aria-invalid={invalid}
-            value={slug}
-            onChange={(event) => {
-              setTouched(true)
-              setSlug(event.target.value)
-            }}
-          />
-        )}
+        <Input
+          name="slug"
+          required
+          value={slug}
+          onChange={(event) => {
+            setTouched(true)
+            setSlug(event.target.value)
+          }}
+        />
       </Field>
     </>
   )

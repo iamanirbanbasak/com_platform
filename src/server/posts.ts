@@ -20,6 +20,15 @@ export async function listClubPosts(
   })
 }
 
+/** How many members-only posts the viewer can't see, so the page can say so. */
+export async function countHiddenPosts(
+  club: { id: string; presidentId: string | null },
+  viewer: Actor | null,
+): Promise<number> {
+  if (await canSeeMembersContent(viewer, club)) return 0
+  return db.post.count({ where: { clubId: club.id, visibility: 'MEMBERS' } })
+}
+
 export async function createPost(
   actor: Actor | null,
   clubId: string,
