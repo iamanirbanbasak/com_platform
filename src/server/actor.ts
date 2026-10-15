@@ -3,7 +3,7 @@ import { fail, type Result } from '@/server/result'
 /** The authenticated user a service call acts on behalf of. */
 export type Actor = { id: string; role: 'admin' | 'user' }
 
-export function isAdmin(actor: Actor | null): actor is Actor {
+export function isAdmin(actor: Actor | null): boolean {
   return actor?.role === 'admin'
 }
 
