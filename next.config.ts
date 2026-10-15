@@ -1,0 +1,26 @@
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  turbopack: {
+    rules: {
+      '*.css': {
+        loaders: ['@tailwindcss/turbopack'],
+        as: '*.css',
+      },
+    },
+  },
+  experimental: {
+    serverActions: {
+      // 5 MB image uploads plus multipart overhead.
+      bodySizeLimit: '6mb',
+    },
+  },
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+    ],
+  },
+}
+
+export default nextConfig
