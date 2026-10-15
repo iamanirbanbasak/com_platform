@@ -7,7 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" \"prisma/*.ts\"",
     "test": "dotenv run -q -f .env.test -- prisma migrate deploy && vitest run",
     "test:watch": "vitest",

@@ -123,7 +123,10 @@ describe('redeemInvite', () => {
     const joiner = actorOf(await createUser())
 
     const expired = await inviteFor(club.id, presidentActor)
-    await db.invite.update({ where: { id: expired.id }, data: { expiresAt: new Date(Date.now() - 1000) } })
+    await db.invite.update({
+      where: { id: expired.id },
+      data: { expiresAt: new Date(Date.now() - 1000) },
+    })
     expect(await redeemInvite(joiner, expired.code)).toMatchObject({ error: { code: 'EXPIRED' } })
 
     const revoked = await inviteFor(club.id, presidentActor)

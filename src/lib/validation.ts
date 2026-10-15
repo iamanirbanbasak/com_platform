@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { parseLocalDateTime } from '@/lib/dates'
+
 export const CLUB_CATEGORIES = [
   'Academic',
   'Arts',
@@ -10,14 +12,6 @@ export const CLUB_CATEGORIES = [
   'Technology',
   'Volunteering',
 ] as const
-
-const optionalUrl = z
-  .string()
-  .trim()
-  .max(2048)
-  .transform((value) => (value === '' ? null : value))
-  .nullable()
-  .optional()
 
 export const slugSchema = z
   .string()
@@ -31,10 +25,11 @@ export const clubProfileSchema = z.object({
   name: z.string().trim().min(2, 'Name is too short').max(80),
   description: z.string().trim().max(5000).default(''),
   category: z.enum(CLUB_CATEGORIES),
-  logoUrl: optionalUrl,
-  coverUrl: optionalUrl,
 })
-export type ClubProfileInput = z.infer<typeof clubProfileSchema>
+
+/** Image URLs come from server-side uploads, never from form fields. `undefined` = unchanged. */
+export type ImageFields = { logoUrl?: string | null; coverUrl?: string | null }
+export type ClubProfileInput = z.infer<typeof clubProfileSchema> & ImageFields
 
 export const createClubSchema = clubProfileSchema.extend({
   slug: slugSchema,
@@ -45,7 +40,7 @@ export const createClubSchema = clubProfileSchema.extend({
     .pipe(z.email('Enter a valid email').nullable())
     .optional(),
 })
-export type CreateClubInput = z.infer<typeof createClubSchema>
+export type CreateClubInput = z.infer<typeof createClubSchema> & ImageFields
 
 export const postSchema = z.object({
   title: z.string().trim().min(1, 'Title is required').max(200),
@@ -54,27 +49,27 @@ export const postSchema = z.object({
 })
 export type PostInput = z.infer<typeof postSchema>
 
+const localDateTime = z.string().transform((value) => parseLocalDateTime(value) ?? undefined)
+
 export const eventSchema = z
   .object({
     title: z.string().trim().min(1, 'Title is required').max(200),
     description: z.string().trim().max(10_000).default(''),
-    startsAt: z.coerce.date({ error: 'Pick a start time' }),
+    startsAt: localDateTime.pipe(z.date({ error: 'Pick a start time' })),
     endsAt: z
-      .union([z.literal(''), z.coerce.date()])
-      .transform((value) => (value === '' ? null : value))
-      .nullable()
-      .optional(),
+      .string()
+      .optional()
+      .transform((value) => (value ? parseLocalDateTime(value) : null))
+      .pipe(z.date({ error: 'Pick a valid end time' }).nullable()),
     venue: z.string().trim().max(200).default(''),
-    coverUrl: optionalUrl,
   })
   .refine((event) => !event.endsAt || event.endsAt >= event.startsAt, {
     message: 'End time must be after the start',
     path: ['endsAt'],
   })
-export type EventInput = z.infer<typeof eventSchema>
+export type EventInput = z.infer<typeof eventSchema> & { coverUrl?: string | null }
 
-export const galleryImageSchema = z.object({
-  url: z.string().trim().min(1).max(2048),
-  caption: z.string().trim().max(300).default(''),
+export const galleryCaptionSchema = z.object({
+  caption: z.string().trim().max(300, 'Keep captions under 300 characters').default(''),
 })
-export type GalleryImageInput = z.infer<typeof galleryImageSchema>
+export type GalleryImageInput = { url: string; caption: string }

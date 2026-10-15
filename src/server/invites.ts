@@ -63,10 +63,7 @@ export async function createInvite(actor: Actor | null, clubId: string): Promise
   throw new Error('Could not generate a unique invite code')
 }
 
-export async function revokeInvite(
-  actor: Actor | null,
-  inviteId: string,
-): Promise<Result<Invite>> {
+export async function revokeInvite(actor: Actor | null, inviteId: string): Promise<Result<Invite>> {
   const invite = await db.invite.findUnique({ where: { id: inviteId } })
   if (!invite) return fail('NOT_FOUND', 'Invite not found.')
 
@@ -155,7 +152,7 @@ export async function getInvitePreview(rawCode: string) {
       expiresAt: true,
       usedAt: true,
       revokedAt: true,
-      club: { select: { name: true, slug: true, logoUrl: true, status: true } },
+      club: { select: { id: true, name: true, slug: true, logoUrl: true, status: true } },
     },
   })
   if (!invite) return null

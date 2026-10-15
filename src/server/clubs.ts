@@ -109,8 +109,8 @@ export async function updateClubProfile(
       name: input.name,
       description: input.description,
       category: input.category,
-      logoUrl: input.logoUrl ?? null,
-      coverUrl: input.coverUrl ?? null,
+      logoUrl: input.logoUrl,
+      coverUrl: input.coverUrl,
     },
   })
   return ok(club)

@@ -76,7 +76,7 @@ export async function updateEvent(
   return ok(
     await db.event.update({
       where: { id: eventId },
-      data: { ...input, endsAt: input.endsAt ?? null, coverUrl: input.coverUrl ?? null },
+      data: { ...input, endsAt: input.endsAt ?? null },
     }),
   )
 }
