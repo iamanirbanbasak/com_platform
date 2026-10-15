@@ -9,7 +9,8 @@ import { put } from '@vercel/blob'
 import { env } from '@/lib/env'
 import { fail, ok, type Result } from '@/server/result'
 
-const MAX_BYTES = 5 * 1024 * 1024
+// Vercel rejects function request bodies over 4.5 MB, so cap uploads below that.
+const MAX_BYTES = 4 * 1024 * 1024
 const EXTENSIONS: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
@@ -24,7 +25,7 @@ const EXTENSIONS: Record<string, string> = {
 export async function storeImage(file: File, folder: string): Promise<Result<string>> {
   const extension = EXTENSIONS[file.type]
   if (!extension) return fail('VALIDATION', 'Upload a JPEG, PNG, WebP or GIF image.')
-  if (file.size > MAX_BYTES) return fail('VALIDATION', 'Images must be 5 MB or smaller.')
+  if (file.size > MAX_BYTES) return fail('VALIDATION', 'Images must be 4 MB or smaller.')
   if (file.size === 0) return fail('VALIDATION', 'That file is empty.')
 
   const name = `${folder}/${randomUUID()}.${extension}`

@@ -10,6 +10,8 @@ export function safeRedirect(target: string | null | undefined, fallback = '/'):
   try {
     const url = new URL(target, BASE)
     if (url.origin !== BASE) return fallback
+    // Dot segments can normalise to a protocol-relative path: "/.//evil.com" -> "//evil.com".
+    if (url.pathname.startsWith('//') || url.pathname.startsWith('/\\')) return fallback
     return `${url.pathname}${url.search}${url.hash}`
   } catch {
     return fallback

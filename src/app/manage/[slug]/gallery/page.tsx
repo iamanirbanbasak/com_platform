@@ -19,7 +19,7 @@ export default async function ManageGalleryPage({ params }: PageProps<'/manage/[
       <section className="max-w-xl">
         <h2 className="mb-4 font-display text-xl font-bold">Add a photo</h2>
         <ActionForm action={uploadPhotoAction.bind(null, club.id, club.slug)} resetOnSuccess>
-          <Field name="photo" label="Photo" hint="JPEG, PNG, WebP or GIF, up to 5 MB.">
+          <Field name="photo" label="Photo" hint="JPEG, PNG, WebP or GIF, up to 4 MB.">
             <input
               id="field-photo"
               name="photo"

@@ -17,7 +17,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx --conditions=react-server prisma/seed.ts",
     "db:studio": "prisma studio",
-    "auth:generate": "auth generate --config src/lib/auth.ts --output prisma/schema.prisma"
+    "auth:generate": "pnpm dlx auth@1.7.9 generate --config src/lib/auth.ts --output prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",

@@ -62,7 +62,7 @@ export function ImageInput({ name, label, currentUrl, hint }: ImageInputProps) {
               Remove current image
             </label>
           ) : null}
-          <p className="text-slate">{hint ?? 'JPEG, PNG, WebP or GIF, up to 5 MB.'}</p>
+          <p className="text-slate">{hint ?? 'JPEG, PNG, WebP or GIF, up to 4 MB.'}</p>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import type { EventInput } from '@/lib/validation'
 import { requireClubManager } from '@/server/access'
 import { isAdmin, type Actor } from '@/server/actor'
+import { getFeedClubIds } from '@/server/my-clubs'
 import { fail, ok, type Result } from '@/server/result'
 
 const clubSelect = { club: { select: { name: true, slug: true, logoUrl: true } } } as const
@@ -24,6 +25,18 @@ function pastFilter(now: Date) {
 export async function listUpcomingEvents(limit = 50) {
   return db.event.findMany({
     where: { ...upcomingFilter(new Date()), club: { status: 'ACTIVE' } },
+    orderBy: { startsAt: 'asc' },
+    take: limit,
+    include: clubSelect,
+  })
+}
+
+/** Upcoming events from the clubs in the user's feed. */
+export async function listFeedEvents(actor: Actor, limit = 6) {
+  const { clubIds } = await getFeedClubIds(actor)
+  if (clubIds.length === 0) return []
+  return db.event.findMany({
+    where: { clubId: { in: clubIds }, club: { status: 'ACTIVE' }, ...upcomingFilter(new Date()) },
     orderBy: { startsAt: 'asc' },
     take: limit,
     include: clubSelect,

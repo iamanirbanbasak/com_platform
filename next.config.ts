@@ -11,8 +11,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      // 5 MB image uploads plus multipart overhead.
-      bodySizeLimit: '6mb',
+      // 4 MB image uploads plus multipart overhead; Vercel's hard limit is 4.5 MB.
+      bodySizeLimit: '4.5mb',
     },
   },
   images: {

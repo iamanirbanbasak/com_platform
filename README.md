@@ -46,14 +46,16 @@ are printed to the terminal, the Google button is hidden, and uploads are saved 
 | `NEXT_PUBLIC_APP_TIMEZONE` | recommended | IANA zone events are entered and shown in, e.g. `Asia/Kolkata` |
 | `NEXT_PUBLIC_SITE_NAME` | no | Name in the header and page titles (default `Clubhouse`) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | no | Google sign-in; redirect URI is `<BETTER_AUTH_URL>/api/auth/callback/google` |
-| `RESEND_API_KEY`, `EMAIL_FROM` | production | Sends verification and password-reset emails |
+| `RESEND_API_KEY`, `EMAIL_FROM` | production | Sends verification and password-reset emails. `EMAIL_FROM` must use a domain verified in Resend: the default `onboarding@resend.dev` only delivers to the Resend account owner, so nobody else could verify their email |
 | `BLOB_READ_WRITE_TOKEN` | production | Vercel Blob storage for logos, covers and gallery photos |
 
 ## Deploying to Vercel
 
 1. Create a Postgres database (Neon via the Vercel marketplace works) and a Vercel Blob store.
-2. Set all variables above in the Vercel project. `BLOB_READ_WRITE_TOKEN` is **required** in
-   production: local-disk uploads only work in development.
+2. Set all variables above in the Vercel project **before the first build**: `NEXT_PUBLIC_*`
+   values are baked in at build time. `BLOB_READ_WRITE_TOKEN` is **required** in production
+   (local-disk uploads only work in development), and Resend needs a verified sending domain.
+   Images are capped at 4 MB because Vercel rejects request bodies over 4.5 MB.
 3. Run migrations and the seed against the production database once:
    `pnpm db:deploy && pnpm db:seed` (with production env vars loaded).
 4. Deploy. `pnpm build` runs `prisma generate` first.
@@ -87,7 +89,7 @@ tests/           Vitest integration tests (real Postgres) and Playwright e2e
 | `pnpm typecheck` / `pnpm lint` / `pnpm format` | Static checks and formatting |
 | `pnpm db:migrate` / `pnpm db:deploy` | Create a migration in dev / apply migrations |
 | `pnpm db:seed` | Create or repair the admin account |
-| `pnpm auth:generate` | Regenerate Better Auth's tables in the Prisma schema |
+| `pnpm auth:generate` | Regenerate Better Auth's tables in the Prisma schema. It **overwrites** `prisma/schema.prisma` (re-add the app relations on `User` afterwards, see `git diff`) and can't load files importing `server-only`, so comment those imports out in `src/lib/{db,email,env}.ts` while it runs |
 
 Test databases need creating once: `createdb club_platform_test && createdb club_platform_e2e`.
 `.env.test` and `.env.e2e` are git-ignored; copy `.env.example`, point `DATABASE_URL` at the

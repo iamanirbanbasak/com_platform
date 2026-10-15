@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import type { PostInput } from '@/lib/validation'
 import { canSeeMembersContent, requireClubManager } from '@/server/access'
 import { isAdmin, type Actor } from '@/server/actor'
+import { getFeedClubIds } from '@/server/my-clubs'
 import { fail, ok, type Result } from '@/server/result'
 
 const authorSelect = { author: { select: { name: true, image: true } } } as const
@@ -76,13 +77,7 @@ export async function getPostForEdit(actor: Actor | null, postId: string) {
  * included only for clubs the viewer is a member or president of.
  */
 export async function getFeed(actor: Actor) {
-  const [follows, memberships, presided] = await Promise.all([
-    db.follow.findMany({ where: { userId: actor.id }, select: { clubId: true } }),
-    db.membership.findMany({ where: { userId: actor.id }, select: { clubId: true } }),
-    db.club.findMany({ where: { presidentId: actor.id }, select: { id: true } }),
-  ])
-  const insiderClubIds = [...memberships.map((m) => m.clubId), ...presided.map((c) => c.id)]
-  const clubIds = [...new Set([...follows.map((f) => f.clubId), ...insiderClubIds])]
+  const { clubIds, insiderClubIds } = await getFeedClubIds(actor)
   if (clubIds.length === 0) return []
 
   const visibilityFilter = isAdmin(actor)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useActionState, useEffect, useRef, type ReactNode } from 'react'
+import { Fragment, useActionState, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useFormStatus } from 'react-dom'
 import { toast } from 'sonner'
 
@@ -32,6 +32,10 @@ export function ActionForm({
   const [state, formAction] = useActionState(action, null)
   const formRef = useRef<HTMLFormElement>(null)
   const router = useRouter()
+  // Remounting the fields after a successful submit clears controlled inputs and
+  // previews, which form.reset() misses. Adjusted during render, keyed by submit time.
+  const [resetKey, setResetKey] = useState(0)
+  if (resetOnSuccess && state?.ok && state.at && state.at !== resetKey) setResetKey(state.at)
 
   useEffect(() => {
     if (!state?.at) return
@@ -52,7 +56,7 @@ export function ActionForm({
             {state.message}
           </p>
         ) : null}
-        {children}
+        <Fragment key={resetKey}>{children}</Fragment>
       </form>
     </FieldErrorsContext>
   )

@@ -8,7 +8,7 @@ import {
   setClubStatus,
   updateClubProfile,
 } from '@/server/clubs'
-import { createEvent, listClubEvents } from '@/server/events'
+import { createEvent, listClubEvents, listFeedEvents } from '@/server/events'
 import { followClub, isFollowing, unfollowClub } from '@/server/follows'
 import { addGalleryImage, deleteGalleryImage } from '@/server/gallery'
 import { leaveClub, removeMember } from '@/server/memberships'
@@ -204,6 +204,45 @@ describe('following and the feed', () => {
     const member = await createUser()
     await db.membership.create({ data: { userId: member.id, clubId: club.id } })
     expect((await getFeed(actorOf(member))).map((p) => p.title).sort()).toEqual(['Inner', 'Open'])
+  })
+})
+
+describe('feed events', () => {
+  it('lists upcoming events from followed and joined clubs only', async () => {
+    const followed = await createClubWithPresident()
+    const joined = await createClubWithPresident()
+    const unrelated = await createClubWithPresident()
+    const soon = (days: number) => new Date(Date.now() + days * 86_400_000)
+    const base = { description: '', venue: '', endsAt: null }
+    await createEvent(followed.presidentActor, followed.club.id, {
+      ...base,
+      title: 'Followed',
+      startsAt: soon(2),
+    })
+    await createEvent(followed.presidentActor, followed.club.id, {
+      ...base,
+      title: 'Old',
+      startsAt: soon(-2),
+    })
+    await createEvent(joined.presidentActor, joined.club.id, {
+      ...base,
+      title: 'Joined',
+      startsAt: soon(1),
+    })
+    await createEvent(unrelated.presidentActor, unrelated.club.id, {
+      ...base,
+      title: 'Other',
+      startsAt: soon(1),
+    })
+
+    const user = await createUser()
+    await followClub(actorOf(user), followed.club.id)
+    await db.membership.create({ data: { userId: user.id, clubId: joined.club.id } })
+
+    expect((await listFeedEvents(actorOf(user))).map((e) => e.title)).toEqual([
+      'Joined',
+      'Followed',
+    ])
   })
 })
 

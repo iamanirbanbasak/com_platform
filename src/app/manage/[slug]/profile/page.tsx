@@ -34,7 +34,7 @@ export default async function ProfilePage({ params }: PageProps<'/manage/[slug]/
           name="cover"
           label="Cover image"
           currentUrl={club.coverUrl}
-          hint="A wide photo works best. JPEG, PNG, WebP or GIF, up to 5 MB."
+          hint="A wide photo works best. JPEG, PNG, WebP or GIF, up to 4 MB."
         />
         <SubmitButton>Save profile</SubmitButton>
       </ActionForm>
